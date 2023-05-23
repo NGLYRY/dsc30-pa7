@@ -1,13 +1,14 @@
+import java.awt.*;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 
 public class MNIST {
 
-    public static final int NUM_TEST = 1_000;   // can be up to 10k
+    public static final int NUM_TEST = 1000;   // can be up to 10k
     public static final int NUM_TRAIN = 60_000; // can be up to 60k
 
-    public static final int K = 3;
+    public static final int K = 6;
     public static final int NUM_CLASSES = 10;
     public static final int IMG_DIM = 28;
 
@@ -45,8 +46,13 @@ public class MNIST {
          */
         @Override
         public int compareTo(ImageLabel imageLabel) {
-            /* TODO */
-            return 0;
+            if (this.priority < imageLabel.priority) {
+                return -1;
+            } else if (this.priority > imageLabel.priority) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -59,8 +65,15 @@ public class MNIST {
      * @return the Euclidean distance between img1 and img2
      */
     public static float totalDist(float[] img1, float[] img2) throws IllegalArgumentException {
-        /* TODO */
-        return 0;
+        if (img1.length != img2.length) {
+            throw new IllegalArgumentException();
+        }
+        float sum = 0;
+        for (int i = 0; i < img1.length; i++) {
+            float diff = img1[i] - img2[i];
+            sum += diff*diff;
+        }
+        return (float) Math.sqrt(sum);
     }
 
     /**
@@ -75,9 +88,26 @@ public class MNIST {
     public static int predict(float[] image, int k) {
         //initialize min priority queue using euclidean distance for priority
         MyPriorityQueue<ImageLabel> pq = new MyPriorityQueue<>(NUM_TRAIN);
-
-        /* TODO */
-        return -1;
+        for (int i = 0; i < TRAIN_IMAGES.length; i++) {
+            float[] tImages = TRAIN_IMAGES[i];
+            int label = TRAIN_LABELS[i];
+            float dist = totalDist(image, tImages);
+            pq.offer(new ImageLabel(label, dist));
+        }
+        int[] labelCounts = new int[NUM_CLASSES];
+        for (int i = 0; i < k; i++) {
+            ImageLabel neighbors = pq.poll();
+            labelCounts[neighbors.label]++;
+        }
+        int maxCount = 0;
+        int predictedLabel = 0;
+        for (int i = 0; i < labelCounts.length; i++) {
+            if (labelCounts[i] > maxCount) {
+                maxCount = labelCounts[i];
+                predictedLabel = i;
+            }
+        }
+        return predictedLabel;
     }
 
     /**
