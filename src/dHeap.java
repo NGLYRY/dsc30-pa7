@@ -126,6 +126,11 @@ public class dHeap<T extends Comparable<? super T>> implements HeapInterface<T> 
         nelems = 0;
     }
 
+    /**
+     *
+     * @return the root
+     * @throws NoSuchElementException if there is nothing in the heap
+     */
     @Override
     public T element() throws NoSuchElementException {
         if (nelems == 0) {
